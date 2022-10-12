@@ -21,7 +21,7 @@
     "pg": "^8.8.0"
   },
   "scripts": {
-    "start-dev": "nodemon server.js",
+    "start-dev": "npm run migrate up && nodemon server.js",
     "migrate": "node-pg-migrate"
   }
 }

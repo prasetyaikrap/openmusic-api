@@ -15,11 +15,11 @@ exports.up = (pgm) => {
       notNull: true,
     },
     created_at: {
-      type: "TEXT",
+      type: "TIMESTAMP",
       notNull: true,
     },
     updated_at: {
-      type: "TEXT",
+      type: "TIMESTAMP",
       notNull: true,
     },
   });
@@ -55,14 +55,15 @@ exports.up = (pgm) => {
       references: "albums",
     },
     created_at: {
-      type: "TEXT",
+      type: "TIMESTAMP",
       notNull: true,
     },
     updated_at: {
-      type: "TEXT",
+      type: "TIMESTAMP",
       notNull: true,
     },
   });
+  pgm.createTable("users", {});
 };
 
 exports.down = (pgm) => {

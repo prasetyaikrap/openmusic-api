@@ -2,11 +2,13 @@ import pkg from "pg";
 import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
+import SongsService from "./SongsService.js";
 import { albumsResMap, songsResMap } from "../../utils/dbMapping/index.js";
 
 export default class AlbumsService {
   constructor() {
     this._pool = new pkg.Pool();
+    this._songsService = new SongsService();
   }
 
   //Post New Album
@@ -35,23 +37,18 @@ export default class AlbumsService {
 
   //Get Album by ID
   async getAlbumById(id) {
-    const query1 = {
+    const query = {
       text: "SELECT * FROM albums WHERE id = $1",
       values: [id],
     };
-    const result1 = await this._pool.query(query1);
-    if (!result1.rows.length) {
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
       throw new NotFoundError("Record not found");
     }
-    const query2 = {
-      text: `SELECT * FROM songs WHERE "albumId" = $1`,
-      values: [id],
-    };
-    const result2 = await this._pool.query(query2);
-    const songDetails = result1.rows.map(albumsResMap)[0];
-    const songList = result2.rows.map(songsResMap);
-    songDetails.songs = songList;
-    return songDetails;
+    const songsList = await this._songsService.getSongsByAlbumId(id);
+    const albumDetails = result.rows.map(albumsResMap)[0];
+    albumDetails.songs = songsList;
+    return albumDetails;
   }
 
   //Update Album by ID

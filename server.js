@@ -4,8 +4,7 @@ dotenv.config();
 import Hapi from "@hapi/hapi";
 import Plugin from "./src/api/index.js";
 import Validator from "./src/utils/validator/index.js";
-import AlbumsService from "./src/services/postgres/AlbumsService.js";
-import SongsService from "./src/services/postgres/SongsService.js";
+import Services from "./src/services/postgres/index.js";
 import ClientError from "./src/exception/ClientError.js";
 
 const init = async () => {
@@ -20,27 +19,29 @@ const init = async () => {
   });
 
   //Register Plugin
-  const albumsService = new AlbumsService();
-  const songsService = new SongsService();
-  const { albumsAPI, songsAPI } = Plugin;
+  const { albumsService, songsService, usersService } = Services;
+  const { albumsAPI, songsAPI, usersAPI } = Plugin;
+  const { albumsPayload, songsPayload, usersPayload } = Validator;
   await server.register([
     {
       plugin: albumsAPI,
       options: {
-        service: {
-          albumsService,
-          songsService,
-        },
-        validator: Validator,
+        service: albumsService,
+        validator: albumsPayload,
       },
     },
     {
       plugin: songsAPI,
       options: {
-        service: {
-          songsService,
-        },
-        validator: Validator,
+        service: songsService,
+        validator: songsPayload,
+      },
+    },
+    {
+      plugin: usersAPI,
+      options: {
+        service: usersService,
+        validator: usersPayload,
       },
     },
   ]);
@@ -63,7 +64,7 @@ const init = async () => {
       // Server ERROR!
       const newResponse = h.response({
         status: "error",
-        message: "Internal Server Error. Please try again later",
+        message: `Internal Server Error. ${response.message}.`,
       });
       newResponse.code(500);
       return newResponse;

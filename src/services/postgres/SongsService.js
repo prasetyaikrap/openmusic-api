@@ -66,6 +66,15 @@ export default class SongsService {
     }
     return result.rows.map(songsDetailResMap)[0];
   }
+  //Get Songs by ID
+  async getSongsByAlbumId(albumid) {
+    const query = {
+      text: `SELECT * FROM songs WHERE "albumId" = $1`,
+      values: [albumid],
+    };
+    const result = await this._pool.query(query);
+    return result.rows.map(songsResMap);
+  }
 
   //Update Song by ID
   async updateSongById(

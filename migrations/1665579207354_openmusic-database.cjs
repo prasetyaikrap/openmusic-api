@@ -63,10 +63,54 @@ exports.up = (pgm) => {
       notNull: true,
     },
   });
-  pgm.createTable("users", {});
+  pgm.createTable("users", {
+    id: {
+      type: "VARCHAR(21)",
+      primaryKey: true,
+      notNull: true,
+    },
+    username: {
+      type: "VARCHAR(20)",
+      unique: true,
+      notNull: true,
+    },
+    password: {
+      type: "TEXT",
+      notNull: true,
+    },
+    fullname: {
+      type: "VARCHAR(100)",
+      notNull: true,
+    },
+    created_at: {
+      type: "TIMESTAMP",
+      notNull: true,
+    },
+    updated_at: {
+      type: "TIMESTAMP",
+      notNull: true,
+    },
+  });
+  pgm.createTable("auth_token", {
+    token: {
+      type: "TEXT",
+      unique: true,
+      notNull: true,
+    },
+  });
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable("songs");
-  pgm.dropTable("albums");
+  pgm.dropTable("songs", {
+    cascade: true,
+  });
+  pgm.dropTable("albums", {
+    cascade: true,
+  });
+  pgm.dropTable("users", {
+    cascade: true,
+  });
+  pgm.dropTable("auth_token", {
+    cascade: true,
+  });
 };

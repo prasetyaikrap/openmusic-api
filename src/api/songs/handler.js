@@ -1,12 +1,12 @@
 export default class SongsHandler {
   constructor(service, validator) {
-    this._service = service.songsService;
+    this._service = service;
     this._validator = validator;
   }
 
   //Post New songs
   async postSongHandler(request, h) {
-    this._validator.songsPayload(request.payload);
+    this._validator(request.payload);
     const { title, year, performer, genre, duration, albumId } =
       request.payload;
     const songId = await this._service.addSongs({
@@ -56,7 +56,7 @@ export default class SongsHandler {
   }
   //Update Song by ID
   async putSongByIdHandler(request, h) {
-    this._validator.songsPayload(request.payload);
+    this._validator(request.payload);
     const { id } = request.params;
     const { title, year, performer, genre, duration, albumId } =
       request.payload;

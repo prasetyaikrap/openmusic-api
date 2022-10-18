@@ -1,11 +1,11 @@
 export default class AlbumsHandler {
   constructor(service, validator) {
-    this._service = service.albumsService;
+    this._service = service;
     this._validator = validator;
   }
   // Post New Album
   async postAlbumHandler(request, h) {
-    this._validator.albumsPayload(request.payload);
+    this._validator(request.payload);
     const { name, year } = request.payload;
     const albumId = await this._service.addAlbums({ name, year });
     const response = h.response({
@@ -47,7 +47,7 @@ export default class AlbumsHandler {
   }
   // Put Album by ID
   async putAlbumByIdHandler(request, h) {
-    this._validator.albumsPayload(request.payload);
+    this._validator(request.payload);
     const { id } = request.params;
     const { name, year } = request.payload;
     await this._service.updateAlbumById(id, { name, year });

@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
 import SongsService from "./SongsService.js";
-import { albumsResMap, songsResMap } from "../../utils/dbMapping/index.js";
+import { albumsResMap } from "../../utils/dbMapping/index.js";
 
 export default class AlbumsService {
   constructor() {

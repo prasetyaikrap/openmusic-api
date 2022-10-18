@@ -1,15 +1,15 @@
 export default class SongsHandler {
   constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+    this._songsService = service.songsService;
+    this._validateSongsPayload = validator.songsPayload;
   }
 
   //Post New songs
   async postSongHandler(request, h) {
-    this._validator(request.payload);
+    this._validateSongsPayload(request.payload);
     const { title, year, performer, genre, duration, albumId } =
       request.payload;
-    const songId = await this._service.addSongs({
+    const songId = await this._songsService.addSongs({
       title,
       year,
       performer,
@@ -29,7 +29,7 @@ export default class SongsHandler {
   }
   //Get Songs
   async getSongsHandler(request, h) {
-    const songs = await this._service.getSongs(request.query);
+    const songs = await this._songsService.getSongs(request.query);
     const response = h.response({
       status: "success",
       message: "Songs Found",
@@ -43,7 +43,7 @@ export default class SongsHandler {
   //Get Song by ID
   async getSongByIdHandler(request, h) {
     const { id } = request.params;
-    const song = await this._service.getSongById(id);
+    const song = await this._songsService.getSongById(id);
     const response = h.response({
       status: "success",
       message: "Song Found",
@@ -56,11 +56,11 @@ export default class SongsHandler {
   }
   //Update Song by ID
   async putSongByIdHandler(request, h) {
-    this._validator(request.payload);
+    this._validateSongsPayload(request.payload);
     const { id } = request.params;
     const { title, year, performer, genre, duration, albumId } =
       request.payload;
-    await this._service.updateSongById(id, {
+    await this._songsService.updateSongById(id, {
       title,
       year,
       performer,
@@ -78,7 +78,7 @@ export default class SongsHandler {
   //Delete Song
   async deleteSong(request, h) {
     const { id } = request.params;
-    await this._service.deleteSong(id);
+    await this._songsService.deleteSong(id);
     const response = h.response({
       status: "success",
       message: "Song deleted successfully",

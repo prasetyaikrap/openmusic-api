@@ -2,9 +2,11 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import Hapi from "@hapi/hapi";
+import Jwt from "@hapi/jwt";
 import Plugin from "./src/api/index.js";
-import Validator from "./src/utils/validator/index.js";
 import Services from "./src/services/postgres/index.js";
+import Validator from "./src/utils/validator/index.js";
+import TokenManager from "./src/utils/tokenize/TokenManager.js";
 import ClientError from "./src/exception/ClientError.js";
 
 const init = async () => {
@@ -19,32 +21,92 @@ const init = async () => {
   });
 
   //Register Plugin
-  const { albumsService, songsService, usersService } = Services;
-  const { albumsAPI, songsAPI, usersAPI } = Plugin;
-  const { albumsPayload, songsPayload, usersPayload } = Validator;
+  const { albumsService, songsService, usersService, authenticationsService } =
+    Services;
+  const { albumsAPI, songsAPI, usersAPI, authenticationsAPI } = Plugin;
+  const {
+    albumsPayload,
+    songsPayload,
+    usersPayload,
+    postAuthenticationPayload,
+    putAuthenticationPayload,
+    deleteAuthenticationPayload,
+  } = Validator;
+  //Internal Plugin
   await server.register([
     {
       plugin: albumsAPI,
       options: {
-        service: albumsService,
-        validator: albumsPayload,
+        service: {
+          albumsService,
+        },
+        validator: {
+          albumsPayload,
+        },
       },
     },
     {
       plugin: songsAPI,
       options: {
-        service: songsService,
-        validator: songsPayload,
+        service: {
+          songsService,
+        },
+        validator: {
+          songsPayload,
+        },
       },
     },
     {
       plugin: usersAPI,
       options: {
-        service: usersService,
-        validator: usersPayload,
+        service: {
+          usersService,
+        },
+        validator: {
+          usersPayload,
+        },
+      },
+    },
+    {
+      plugin: authenticationsAPI,
+      options: {
+        service: {
+          authenticationsService,
+          usersService,
+        },
+        validator: {
+          postAuthenticationPayload,
+          putAuthenticationPayload,
+          deleteAuthenticationPayload,
+        },
+        tokenManager: TokenManager,
       },
     },
   ]);
+
+  // External Plugin
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  //JWT Authentication Strategy
+  server.auth.strategy("openmusic_jwt", "jwt", {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
+  });
 
   //Error Handling with Extension
   server.ext("onPreResponse", (request, h) => {

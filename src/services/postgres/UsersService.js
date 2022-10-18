@@ -2,6 +2,7 @@ import pkg from "pg";
 import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
 import InvariantError from "../../exception/InvariantError.js";
+import AuthenticationError from "../../exception/AuthenticationError.js";
 
 export default class UserService {
   constructor() {
@@ -37,5 +38,35 @@ export default class UserService {
         "Failed to add new user. Username is already exist"
       );
     }
+  }
+  //Get User
+  async getUserById(userid) {
+    const query = {
+      text: "SELECT id, username, fullname FROM users WHERE id = $1",
+      values: [userid],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new InvariantError("User Not Found");
+    }
+    return result.rows[0];
+  }
+
+  //Verify user credential
+  async verifyUserCredential({ username, password }) {
+    const query = {
+      text: "SELECT id, password FROM users WHERE username = $1",
+      values: [username],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new AuthenticationError("Invalid Credential");
+    }
+    const { id, password: hashedPassword } = result.rows[0];
+    const matched = await bcrypt.compare(password, hashedPassword);
+    if (!matched) {
+      throw new AuthenticationError("Invalid Credential");
+    }
+    return id;
   }
 }

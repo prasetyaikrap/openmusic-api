@@ -91,7 +91,7 @@ exports.up = (pgm) => {
       notNull: true,
     },
   });
-  pgm.createTable("auth_token", {
+  pgm.createTable("auth_tokens", {
     token: {
       type: "TEXT",
       unique: true,
@@ -110,7 +110,7 @@ exports.down = (pgm) => {
   pgm.dropTable("users", {
     cascade: true,
   });
-  pgm.dropTable("auth_token", {
+  pgm.dropTable("auth_tokens", {
     cascade: true,
   });
 };

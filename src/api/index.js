@@ -1,9 +1,11 @@
 import AlbumsHandler from "./albums/handler.js";
 import AlbumsRoutes from "./albums/route.js";
+import AuthenticationsHandler from "./authentications/handler.js";
+import AuthenticationsRoutes from "./authentications/route.js";
 import SongsHandler from "./songs/handler.js";
 import SongsRoutes from "./songs/route.js";
 import UsersHandler from "./users/handler.js";
-import UsersRoute from "./users/route.js";
+import UsersRoutes from "./users/route.js";
 
 const Plugin = {
   albumsAPI: {
@@ -27,7 +29,19 @@ const Plugin = {
     version: "1.0.0",
     register: async (server, { service, validator }) => {
       const usersHandler = new UsersHandler(service, validator);
-      server.route(UsersRoute(usersHandler));
+      server.route(UsersRoutes(usersHandler));
+    },
+  },
+  authenticationsAPI: {
+    name: "Authentication API Plugin",
+    version: "1.0.0",
+    register: async (server, { service, validator, tokenManager }) => {
+      const authenticationsHandler = new AuthenticationsHandler(
+        service,
+        validator,
+        tokenManager
+      );
+      server.route(AuthenticationsRoutes(authenticationsHandler));
     },
   },
 };

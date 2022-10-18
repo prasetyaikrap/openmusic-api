@@ -1,14 +1,14 @@
 export default class UsersHandler {
   constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+    this._usersService = service.usersService;
+    this._validateUsersPayload = validator.usersPayload;
   }
 
   //Post new user
   async postUserHandler(request, h) {
-    await this._validator(request.payload);
+    await this._validateUsersPayload(request.payload);
     const { username, password, fullname } = request.payload;
-    const userId = await this._service.addUser({
+    const userId = await this._usersService.addUser({
       username,
       password,
       fullname,

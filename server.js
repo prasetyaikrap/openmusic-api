@@ -20,10 +20,40 @@ const init = async () => {
     },
   });
 
+  // External Plugin
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  //JWT Authentication Strategy
+  server.auth.strategy("openmusic_jwt", "jwt", {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
+  });
+
   //Register Plugin
-  const { albumsService, songsService, usersService, authenticationsService } =
-    Services;
-  const { albumsAPI, songsAPI, usersAPI, authenticationsAPI } = Plugin;
+  const {
+    albumsService,
+    songsService,
+    usersService,
+    authenticationsService,
+    playlistsService,
+  } = Services;
+  const { albumsAPI, songsAPI, usersAPI, authenticationsAPI, playlistsAPI } =
+    Plugin;
   const {
     albumsPayload,
     songsPayload,
@@ -31,6 +61,10 @@ const init = async () => {
     postAuthenticationPayload,
     putAuthenticationPayload,
     deleteAuthenticationPayload,
+    postPlaylistPayload,
+    putPlaylistPayload,
+    postPlaylistSongPayload,
+    deletePlaylistSongPayload,
   } = Validator;
   //Internal Plugin
   await server.register([
@@ -68,6 +102,20 @@ const init = async () => {
       },
     },
     {
+      plugin: playlistsAPI,
+      options: {
+        service: {
+          playlistsService,
+        },
+        validator: {
+          postPlaylistPayload,
+          putPlaylistPayload,
+          postPlaylistSongPayload,
+          deletePlaylistSongPayload,
+        },
+      },
+    },
+    {
       plugin: authenticationsAPI,
       options: {
         service: {
@@ -83,30 +131,6 @@ const init = async () => {
       },
     },
   ]);
-
-  // External Plugin
-  await server.register([
-    {
-      plugin: Jwt,
-    },
-  ]);
-
-  //JWT Authentication Strategy
-  server.auth.strategy("openmusic_jwt", "jwt", {
-    keys: process.env.ACCESS_TOKEN_KEY,
-    verify: {
-      aud: false,
-      iss: false,
-      sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
-    },
-    validate: (artifacts) => ({
-      isValid: true,
-      credentials: {
-        id: artifacts.decoded.payload.id,
-      },
-    }),
-  });
 
   //Error Handling with Extension
   server.ext("onPreResponse", (request, h) => {

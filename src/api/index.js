@@ -2,6 +2,8 @@ import AlbumsHandler from "./albums/handler.js";
 import AlbumsRoutes from "./albums/route.js";
 import AuthenticationsHandler from "./authentications/handler.js";
 import AuthenticationsRoutes from "./authentications/route.js";
+import PlaylistsHandler from "./playlists/handler.js";
+import PlaylistsRoutes from "./playlists/route.js";
 import SongsHandler from "./songs/handler.js";
 import SongsRoutes from "./songs/route.js";
 import UsersHandler from "./users/handler.js";
@@ -30,6 +32,14 @@ const Plugin = {
     register: async (server, { service, validator }) => {
       const usersHandler = new UsersHandler(service, validator);
       server.route(UsersRoutes(usersHandler));
+    },
+  },
+  playlistsAPI: {
+    name: "Playlists API Plugin",
+    version: "1.0.0",
+    register: async (server, { service, validator }) => {
+      const playlistsHandler = new PlaylistsHandler(service, validator);
+      server.route(PlaylistsRoutes(playlistsHandler));
     },
   },
   authenticationsAPI: {

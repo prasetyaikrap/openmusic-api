@@ -1,12 +1,18 @@
 import { AlbumsPayloadSchema } from "./albumsSchema.js";
 import { SongsPayloadSchema } from "./songsSchema.js";
 import { UserPayloadSchema } from "./userSchema.js";
-import InvariantError from "../../exception/InvariantError.js";
 import {
   DeleteAuthenticationPayloadSchema,
   PostAuthenticationPayloadSchema,
   PutAuthenticationPayloadSchema,
 } from "./authenticationsSchema.js";
+import {
+  DeletePlaylistSongPayloadSchema,
+  PostPlaylistPayloadSchema,
+  PostPlaylistSongPayloadSchema,
+  PutPlaylistPayloadSchema,
+} from "./playlistsSchema.js";
+import InvariantError from "../../exception/InvariantError.js";
 
 const Validator = {
   albumsPayload: (payload) => {
@@ -42,6 +48,30 @@ const Validator = {
   deleteAuthenticationPayload: (payload) => {
     const validationResult =
       DeleteAuthenticationPayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  postPlaylistPayload: (payload) => {
+    const validationResult = PostPlaylistPayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  putPlaylistPayload: (payload) => {
+    const validationResult = PutPlaylistPayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  postPlaylistSongPayload: (payload) => {
+    const validationResult = PostPlaylistSongPayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  deletePlaylistSongPayload: (payload) => {
+    const validationResult = DeletePlaylistSongPayloadSchema.validate(payload);
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message);
     }

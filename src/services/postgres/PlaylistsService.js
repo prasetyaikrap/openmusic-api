@@ -3,10 +3,12 @@ import pkg from "pg";
 import AuthorizationError from "../../exception/AuthorizationError.js";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
+import SongsService from "./SongsService.js";
 
 export default class PlaylistsService {
   constructor() {
     this._pool = new pkg.Pool();
+    this._songsService = new SongsService();
   }
 
   async addPlaylist({ name, owner }) {
@@ -49,6 +51,7 @@ export default class PlaylistsService {
   }
 
   async addSongToPlaylist(playlistId, { songId }) {
+    await this._songsService.verifySong(songId);
     const id = `ps-${nanoid(9)}`;
     const query = {
       text: "INSERT INTO playlist_songs VALUES($1, $2, $3) RETURNING id",

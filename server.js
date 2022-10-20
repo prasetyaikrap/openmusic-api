@@ -144,6 +144,7 @@ const init = async () => {
           message: response.message,
         });
         newResponse.code(response.statusCode);
+        console.log(response);
         return newResponse;
       }
       if (!response.isServer) {
@@ -155,6 +156,7 @@ const init = async () => {
         message: `Internal Server Error. ${response.message}.`,
       });
       newResponse.code(500);
+      console.log(response);
       return newResponse;
     }
     return h.continue;

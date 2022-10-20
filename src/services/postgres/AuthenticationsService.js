@@ -1,6 +1,5 @@
 import pkg from "pg";
 import InvariantError from "../../exception/InvariantError.js";
-import NotFoundError from "../../exception/NotFoundError.js";
 
 export default class AuthenticationsService {
   constructor() {
@@ -35,7 +34,7 @@ export default class AuthenticationsService {
     };
     const result = await this._pool.query(query);
     if (result.rowCount == 0) {
-      throw new NotFoundError("Delete Failed. Token does not exist");
+      throw new InvariantError("Delete Failed. Token does not exist");
     }
   }
 }

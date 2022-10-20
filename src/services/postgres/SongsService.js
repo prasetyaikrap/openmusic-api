@@ -102,4 +102,15 @@ export default class SongsService {
       throw new NotFoundError("Deleting Failed. Songs ID not found");
     }
   }
+
+  async verifySong(id) {
+    const query = {
+      text: "SELECT id FROM songs WHERE id = $1",
+      values: [id],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Songs ID not found");
+    }
+  }
 }

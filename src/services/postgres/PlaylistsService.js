@@ -3,6 +3,7 @@ import pkg from "pg";
 import AuthorizationError from "../../exception/AuthorizationError.js";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
+import { getPlaylistActivitesMap } from "../../utils/dbMapping/index.js";
 import SongsService from "./SongsService.js";
 
 export default class PlaylistsService {
@@ -11,7 +12,7 @@ export default class PlaylistsService {
     this._songsService = new SongsService();
   }
 
-  async addPlaylist({ name, owner }) {
+  async addPlaylist(owner, { name }) {
     const id = `pl-${nanoid(13)}`;
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
@@ -116,5 +117,43 @@ export default class PlaylistsService {
     if (result.rows[0].owner != owner) {
       throw new AuthorizationError("Unauthorized Access");
     }
+  }
+
+  async addPlaylistActivites(owner, playlistId, { songId }, action) {
+    const time = new Date().toISOString();
+    const query = {
+      text: `INSERT INTO playlist_activites(playlist_id, song_id, user_id, action, time) VALUES($1, $2, $3, $4, $5) RETURNING id`,
+      values: [playlistId, songId, owner, action, time],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows[0].id) {
+      throw new InvariantError("Failed to add activites");
+    }
+  }
+
+  async getPlaylistActivites(owner, playlistId) {
+    const query = {
+      text: `SELECT pa.playlist_id, u.username, s.title, pa.action, pa.time 
+      FROM playlist_activites pa
+      JOIN users u ON pa.user_id = u.id
+      JOIN songs s ON pa.song_id = s.id
+      WHERE pa.user_id = $1 AND pa.playlist_id = $2`,
+      values: [owner, playlistId],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Activites record not found");
+    }
+    const resultMap = result.rows.map(getPlaylistActivitesMap);
+    const activites = {
+      playlistId: resultMap[0].playlistId,
+      activities: resultMap.map(({ username, title, action, time }) => ({
+        username,
+        title,
+        action,
+        time,
+      })),
+    };
+    return activites;
   }
 }

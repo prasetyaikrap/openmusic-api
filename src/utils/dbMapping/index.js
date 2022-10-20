@@ -33,3 +33,17 @@ export const songsDetailResMap = ({
   createdAt: created_at,
   updatedAt: updated_at,
 });
+
+export const getPlaylistActivitesMap = ({
+  playlist_id,
+  username,
+  title,
+  action,
+  time,
+}) => ({
+  playlistId: playlist_id,
+  username,
+  title,
+  action,
+  time,
+});

@@ -141,6 +141,35 @@ exports.up = (pgm) => {
       onDelete: "CASCADE",
     },
   });
+  pgm.createTable("playlist_activites", {
+    id: {
+      type: "SERIAL",
+      notNull: true,
+      primaryKey: true,
+    },
+    playlist_id: {
+      type: "VARCHAR(16)",
+      notNull: true,
+      references: "playlists",
+      onDelete: "CASCADE",
+    },
+    song_id: {
+      type: "VARCHAR(16)",
+      notNull: true,
+    },
+    user_id: {
+      type: "VARCHAR(21)",
+      notNull: true,
+    },
+    action: {
+      type: "VARCHAR(20)",
+      notNull: true,
+    },
+    time: {
+      type: "TIMESTAMP",
+      notNull: true,
+    },
+  });
 };
 
 exports.down = (pgm) => {

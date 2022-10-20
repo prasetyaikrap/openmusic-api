@@ -3,7 +3,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import Hapi from "@hapi/hapi";
 import Jwt from "@hapi/jwt";
-import Plugin from "./src/api/index.js";
+
+//Internal Services
+import Plugins from "./src/api/index.js";
 import Services from "./src/services/postgres/index.js";
 import Validator from "./src/utils/validator/index.js";
 import TokenManager from "./src/utils/tokenize/TokenManager.js";
@@ -52,8 +54,8 @@ const init = async () => {
     authenticationsService,
     playlistsService,
   } = Services;
-  const { albumsAPI, songsAPI, usersAPI, authenticationsAPI, playlistsAPI } =
-    Plugin;
+  const { AlbumsAPI, SongsAPI, UsersAPI, AuthenticationsAPI, PlaylistsAPI } =
+    Plugins;
   const {
     albumsPayload,
     songsPayload,
@@ -69,7 +71,7 @@ const init = async () => {
   //Internal Plugin
   await server.register([
     {
-      plugin: albumsAPI,
+      plugin: AlbumsAPI,
       options: {
         service: {
           albumsService,
@@ -80,7 +82,7 @@ const init = async () => {
       },
     },
     {
-      plugin: songsAPI,
+      plugin: SongsAPI,
       options: {
         service: {
           songsService,
@@ -91,7 +93,7 @@ const init = async () => {
       },
     },
     {
-      plugin: usersAPI,
+      plugin: UsersAPI,
       options: {
         service: {
           usersService,
@@ -102,7 +104,7 @@ const init = async () => {
       },
     },
     {
-      plugin: playlistsAPI,
+      plugin: PlaylistsAPI,
       options: {
         service: {
           playlistsService,
@@ -116,7 +118,7 @@ const init = async () => {
       },
     },
     {
-      plugin: authenticationsAPI,
+      plugin: AuthenticationsAPI,
       options: {
         service: {
           authenticationsService,
@@ -160,7 +162,7 @@ const init = async () => {
 
   //Start Server
   await server.start();
-  console.log(`Server berjalan pada ${server.info.uri}`);
+  console.log(`Server running on ${server.info.uri}`);
 };
 
 init();

@@ -24,23 +24,23 @@ export default class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getPlaylists(userId) {
+  async getPlaylists(owner) {
     const query = {
-      text: `SELECT playlists.id, playlists.name, users.username 
+      text: `SELECT p.id, p.name, u.username 
       FROM playlists p
       JOIN users u ON p.owner = u.id 
       WHERE p.owner = $1
       ORDER BY p.updated_at DESC`,
-      values: [userId],
+      values: [owner],
     };
     const result = await this._pool.query(query);
     return result.rows;
   }
 
-  async deletePlaylist(playlistId) {
+  async deletePlaylist(owner, playlistId) {
     const query = {
-      text: "DELETE FROM playlists WHERE id = $1",
-      values: [playlistId],
+      text: "DELETE FROM playlists WHERE owner = $1 AND id = $2",
+      values: [owner, playlistId],
     };
     const result = await this._pool.query(query);
     if (result.rowCount == 0) {
@@ -60,19 +60,19 @@ export default class PlaylistsService {
     }
   }
 
-  async getPlaylistById(userId, playlistId) {
+  async getPlaylistById(owner, playlistId) {
     const query = {
-      text: `SELECT playlists.id, playlists.name, users.username 
+      text: `SELECT p.id, p.name, u.username 
       FROM playlists p 
       JOIN users u ON p.owner = u.id 
       WHERE p.owner = $1 AND p.id = $2`,
-      values: [userId, playlistId],
+      values: [owner, playlistId],
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new InvariantError("Record not found");
     }
-    const songs = await this.getSongsByPlaylistId(playlistId);
+    const songs = await this.getSongsFromPlaylist(playlistId);
     result.rows[0].songs = songs;
     return result.rows[0];
   }

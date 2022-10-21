@@ -3,12 +3,11 @@ import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
 import SongsService from "./SongsService.js";
-import { albumsResMap } from "../../utils/dbMapping/index.js";
+import { albumsResMap } from "../../utils/dbMapping/albums.js";
 
 export default class AlbumsService {
   constructor() {
     this._pool = new pkg.Pool();
-    this._songsService = new SongsService();
   }
 
   //Post New Album
@@ -38,16 +37,34 @@ export default class AlbumsService {
   //Get Album by ID
   async getAlbumById(id) {
     const query = {
-      text: "SELECT * FROM albums WHERE id = $1",
+      text: `SELECT alb.id, alb.name, alb.year, alb.created_at, alb.updated_at, s.id AS song_id, s.title, s.performer 
+      FROM albums alb
+      LEFT JOIN songs s ON alb.id = s.album_id
+      WHERE alb.id = $1`,
       values: [id],
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new NotFoundError("Record not found");
     }
-    const songsList = await this._songsService.getSongsByAlbumId(id);
-    const albumDetails = result.rows.map(albumsResMap)[0];
-    albumDetails.songs = songsList;
+    const resultMap = result.rows.map(albumsResMap);
+    const songsList = resultMap.map(({ songId, title, performer }) => {
+      if (songId != null) {
+        return {
+          id: songId,
+          title,
+          performer,
+        };
+      }
+    });
+    const albumDetails = {
+      id: resultMap[0].id,
+      name: resultMap[0].name,
+      year: resultMap[0].year,
+      created_at: resultMap[0].createdAt,
+      updated_at: resultMap[0].updatedAt,
+      songs: songsList[0] != null ? songsList : [],
+    };
     return albumDetails;
   }
 

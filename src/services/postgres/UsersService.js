@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
 import InvariantError from "../../exception/InvariantError.js";
 import AuthenticationError from "../../exception/AuthenticationError.js";
+import NotFoundError from "../../exception/NotFoundError.js";
 
 export default class UserService {
   constructor() {
@@ -33,7 +34,7 @@ export default class UserService {
       values: [username],
     };
     const result = await this._pool.query(query);
-    if (result.rows.length > 0) {
+    if (result.rows.length) {
       throw new InvariantError(
         "Failed to add new user. Username is already exist"
       );
@@ -68,5 +69,16 @@ export default class UserService {
       throw new AuthenticationError("Invalid Credential");
     }
     return id;
+  }
+
+  async verifyUserExistence(userId) {
+    const query = {
+      text: "SELECT id FROM users WHERE id = $1",
+      values: [userId],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("User Not Found");
+    }
   }
 }

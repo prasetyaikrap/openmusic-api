@@ -49,7 +49,7 @@ exports.up = (pgm) => {
       type: "INT",
       notNull: false,
     },
-    albumId: {
+    album_id: {
       type: "VARCHAR(16)",
       notNull: false,
       references: "albums",
@@ -112,6 +112,7 @@ exports.up = (pgm) => {
       type: "VARCHAR(21)",
       notNull: true,
       references: "users",
+      onDelete: "CASCADE",
     },
     created_at: {
       type: "TIMESTAMP",
@@ -170,6 +171,24 @@ exports.up = (pgm) => {
       notNull: true,
     },
   });
+  pgm.createTable("collaborations", {
+    id: {
+      type: "VARCHAR(16)",
+      notNull: true,
+      primaryKey: true,
+    },
+    playlist_id: {
+      type: "VARCHAR(16)",
+      notNull: true,
+      references: "playlists",
+      onDelete: "CASCADE",
+    },
+    user_id: {
+      type: "VARCHAR(21)",
+      notNull: true,
+      references: "users",
+    },
+  });
 };
 
 exports.down = (pgm) => {
@@ -177,6 +196,12 @@ exports.down = (pgm) => {
     cascade: true,
   });
   pgm.dropTable("albums", {
+    cascade: true,
+  });
+  pgm.dropTable("collaborations", {
+    cascade: true,
+  });
+  pgm.dropTable("playlist_activites", {
     cascade: true,
   });
   pgm.dropTable("playlist_songs", {

@@ -46,29 +46,32 @@ const init = async () => {
     }),
   });
 
-  //Register Plugin
+  //Register Internal Plugin
   const {
     albumsService,
     songsService,
     usersService,
     authenticationsService,
     playlistsService,
+    collaborationsService,
   } = Services;
-  const { AlbumsAPI, SongsAPI, UsersAPI, AuthenticationsAPI, PlaylistsAPI } =
-    Plugins;
   const {
-    albumsPayload,
-    songsPayload,
-    usersPayload,
-    postAuthenticationPayload,
-    putAuthenticationPayload,
-    deleteAuthenticationPayload,
-    postPlaylistPayload,
-    putPlaylistPayload,
-    postPlaylistSongPayload,
-    deletePlaylistSongPayload,
+    AlbumsAPI,
+    SongsAPI,
+    UsersAPI,
+    AuthenticationsAPI,
+    PlaylistsAPI,
+    CollaborationsAPI,
+  } = Plugins;
+  const {
+    AlbumsSchema,
+    AuthenticationsSchema,
+    CollaborationsSchema,
+    PlaylistsSchema,
+    SongsSchema,
+    UsersSchema,
   } = Validator;
-  //Internal Plugin
+
   await server.register([
     {
       plugin: AlbumsAPI,
@@ -76,9 +79,7 @@ const init = async () => {
         service: {
           albumsService,
         },
-        validator: {
-          albumsPayload,
-        },
+        validator: AlbumsSchema,
       },
     },
     {
@@ -87,9 +88,7 @@ const init = async () => {
         service: {
           songsService,
         },
-        validator: {
-          songsPayload,
-        },
+        validator: SongsSchema,
       },
     },
     {
@@ -98,9 +97,7 @@ const init = async () => {
         service: {
           usersService,
         },
-        validator: {
-          usersPayload,
-        },
+        validator: UsersSchema,
       },
     },
     {
@@ -108,13 +105,20 @@ const init = async () => {
       options: {
         service: {
           playlistsService,
+          songsService,
         },
-        validator: {
-          postPlaylistPayload,
-          putPlaylistPayload,
-          postPlaylistSongPayload,
-          deletePlaylistSongPayload,
+        validator: PlaylistsSchema,
+      },
+    },
+    {
+      plugin: CollaborationsAPI,
+      options: {
+        service: {
+          collaborationsService,
+          playlistsService,
+          usersService,
         },
+        validator: CollaborationsSchema,
       },
     },
     {
@@ -124,11 +128,7 @@ const init = async () => {
           authenticationsService,
           usersService,
         },
-        validator: {
-          postAuthenticationPayload,
-          putAuthenticationPayload,
-          deleteAuthenticationPayload,
-        },
+        validator: AuthenticationsSchema,
         tokenManager: TokenManager,
       },
     },
@@ -144,11 +144,9 @@ const init = async () => {
           message: response.message,
         });
         newResponse.code(response.statusCode);
-        // console.log(response);
         return newResponse;
       }
       if (!response.isServer) {
-        // console.log(response);
         return h.continue;
       }
       // Server ERROR!
@@ -157,7 +155,6 @@ const init = async () => {
         message: `Internal Server Error. ${response.message}.`,
       });
       newResponse.code(500);
-      // console.log(response);
       return newResponse;
     }
     return h.continue;

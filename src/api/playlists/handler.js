@@ -1,6 +1,7 @@
 export default class PlaylistsHandler {
   constructor(service, validator) {
     this._playlistsService = service.playlistsService;
+    this._songsService = service.songsService;
     this._postPlaylistPayload = validator.postPlaylistPayload;
     this._putPlaylistPayload = validator.putPlaylistPayload;
     this._postPlaylistSongPayload = validator.postPlaylistSongPayload;
@@ -30,7 +31,9 @@ export default class PlaylistsHandler {
     const playlists = await this._playlistsService.getPlaylists(credentialId);
     const response = h.response({
       status: "success",
-      message: "Playlists record found",
+      message: `Playlists record found${
+        playlists.length == 0 && " with empty lists"
+      }`,
       data: {
         playlists,
       },
@@ -44,7 +47,8 @@ export default class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
     const { songId } = request.payload;
-    await this._playlistsService.verifyPlaylistOwner(credentialId, playlistId);
+    await this._playlistsService.verifyPlaylistEditor(credentialId, playlistId);
+    await this._songsService.verifySong(songId);
     await this._playlistsService.addSongToPlaylist(playlistId, { songId });
     await this._playlistsService.addPlaylistActivites(
       credentialId,
@@ -63,7 +67,7 @@ export default class PlaylistsHandler {
   async getPlaylistDetailsHandler(request, h) {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
-    await this._playlistsService.verifyPlaylistOwner(credentialId, playlistId);
+    await this._playlistsService.verifyPlaylistEditor(credentialId, playlistId);
     const playlist = await this._playlistsService.getPlaylistById(
       credentialId,
       playlistId
@@ -84,7 +88,7 @@ export default class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
     const { songId } = request.payload;
-    await this._playlistsService.verifyPlaylistOwner(credentialId, playlistId);
+    await this._playlistsService.verifyPlaylistEditor(credentialId, playlistId);
     await this._playlistsService.deleteSongFromPlaylist(playlistId, { songId });
     await this._playlistsService.addPlaylistActivites(
       credentialId,
@@ -113,17 +117,15 @@ export default class PlaylistsHandler {
     return response;
   }
 
-  async getPlaylistActivitesHandler(request, h) {
+  async getPlaylistActivitiesHandler(request, h) {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
-    await this._playlistsService.verifyPlaylistOwner(credentialId, playlistId);
-    const playlistActivites = await this._playlistsService.getPlaylistActivites(
-      credentialId,
-      playlistId
-    );
+    await this._playlistsService.verifyPlaylistEditor(credentialId, playlistId);
+    const playlistActivities =
+      await this._playlistsService.getPlaylistActivities(playlistId);
     const response = h.response({
       status: "success",
-      data: playlistActivites,
+      data: playlistActivities,
     });
     response.code(200);
     return response;

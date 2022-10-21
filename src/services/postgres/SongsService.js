@@ -2,7 +2,7 @@ import pkg from "pg";
 import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
-import { songsDetailResMap, songsResMap } from "../../utils/dbMapping/index.js";
+import { songsDetailResMap, songsResMap } from "../../utils/dbMapping/songs.js";
 
 export default class SongsService {
   constructor() {
@@ -69,7 +69,7 @@ export default class SongsService {
   //Get Songs by ID
   async getSongsByAlbumId(albumid) {
     const query = {
-      text: `SELECT * FROM songs WHERE "albumId" = $1`,
+      text: `SELECT * FROM songs WHERE album_id = $1`,
       values: [albumid],
     };
     const result = await this._pool.query(query);
@@ -82,7 +82,7 @@ export default class SongsService {
     { title, year, performer, genre, duration, albumId }
   ) {
     const query = {
-      text: `UPDATE songs SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, "albumId" = $6 WHERE id = $7 RETURNING id`,
+      text: `UPDATE songs SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, album_id = $6 WHERE id = $7 RETURNING id`,
       values: [title, year, performer, genre, duration, albumId, id],
     };
     const result = await this._pool.query(query);

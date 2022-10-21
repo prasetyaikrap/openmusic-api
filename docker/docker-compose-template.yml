@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  postgres-server:
+    container_name: postgres-server
+    image: prasetyaip/ems-postgresql:v1
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=DBUSER
+      - POSTGRES_PASSWORD=DBPASSWORD
+      - POSTGRES_DB=DBNAME

@@ -6,7 +6,7 @@ import Jwt from "@hapi/jwt";
 
 //Internal Services
 import Plugins from "./src/api/index.js";
-import Services from "./src/services/postgres/index.js";
+import Services from "./src/services/index.js";
 import Validator from "./src/utils/validator/index.js";
 import TokenManager from "./src/utils/tokenize/TokenManager.js";
 import ClientError from "./src/exception/ClientError.js";
@@ -54,6 +54,7 @@ const init = async () => {
     authenticationsService,
     playlistsService,
     collaborationsService,
+    producerService,
   } = Services;
   const {
     AlbumsAPI,
@@ -70,6 +71,7 @@ const init = async () => {
     PlaylistsSchema,
     SongsSchema,
     UsersSchema,
+    ExportsSchema,
   } = Validator;
 
   await server.register([
@@ -130,6 +132,15 @@ const init = async () => {
         },
         validator: AuthenticationsSchema,
         tokenManager: TokenManager,
+      },
+    },
+    {
+      plugin: ExportsAPI,
+      options: {
+        sevice: {
+          producerService,
+        },
+        validator: ExportsSchema,
       },
     },
   ]);

@@ -2,7 +2,6 @@ import pkg from "pg";
 import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
-import SongsService from "./SongsService.js";
 import { albumsResMap } from "../../utils/dbMapping/albums.js";
 
 export default class AlbumsService {

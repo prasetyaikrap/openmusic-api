@@ -1,6 +1,4 @@
 // import routes from "./routes.js";
-import * as dotenv from "dotenv";
-dotenv.config();
 import Hapi from "@hapi/hapi";
 import Jwt from "@hapi/jwt";
 import Inert from "@hapi/inert";
@@ -11,11 +9,12 @@ import Services from "./src/services/index.js";
 import Validator from "./src/utils/validator/index.js";
 import TokenManager from "./src/utils/tokenize/TokenManager.js";
 import ClientError from "./src/exception/ClientError.js";
+import { config } from "./src/utils/config/config.js";
 
 const init = async () => {
   const server = Hapi.server({
-    port: process.env.PORT || 5000,
-    host: process.env.HOST || "localhost",
+    host: config.app.host,
+    port: config.app.port,
     routes: {
       cors: {
         origin: ["*"],
@@ -35,12 +34,12 @@ const init = async () => {
 
   //JWT Authentication Strategy
   server.auth.strategy("openmusic_jwt", "jwt", {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.jwt.keys,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.jwt.maxAge,
     },
     validate: (artifacts) => ({
       isValid: true,
@@ -60,6 +59,7 @@ const init = async () => {
     collaborationsService,
     producerService,
     storageService,
+    cacheService,
   } = Services;
   const {
     AlbumsAPI,
@@ -88,6 +88,8 @@ const init = async () => {
       options: {
         service: {
           albumsService,
+          usersService,
+          cacheService,
         },
         validator: AlbumsSchema,
       },

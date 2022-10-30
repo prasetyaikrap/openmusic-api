@@ -2,7 +2,7 @@ import pkg from "pg";
 import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
-import { albumsResMap } from "../../utils/dbMapping/albums.js";
+import { albumSongList, albumsResMap } from "../../utils/dbMapping/albums.js";
 
 export default class AlbumsService {
   constructor() {
@@ -46,15 +46,7 @@ export default class AlbumsService {
       throw new NotFoundError("Record not found");
     }
     const resultMap = result.rows.map(albumsResMap);
-    const songsList = resultMap.map(({ songId, title, performer }) => {
-      if (songId != null) {
-        return {
-          id: songId,
-          title,
-          performer,
-        };
-      }
-    });
+    const songsList = resultMap.map(albumSongList);
     const albumDetails = {
       id: resultMap[0].id,
       name: resultMap[0].name,
@@ -92,6 +84,17 @@ export default class AlbumsService {
     }
   }
 
+  async verifyAlbum(albumId) {
+    const query = {
+      text: `SELECT id FROM albums WHERE id = $1`,
+      values: [albumId],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError("Album not found");
+    }
+  }
+
   //Upload album cover
   async uploadAlbumCover(albumId, coverUrl) {
     const updatedAt = new Date().toISOString();
@@ -102,6 +105,82 @@ export default class AlbumsService {
     const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new InvariantError("Failed to update row");
+    }
+  }
+
+  async updateAlbumLikes(userId, albumId) {
+    const rowCount = await this.verifyUserAlbumLike(userId, albumId);
+    if (!rowCount) {
+      const query = {
+        text: `INSERT INTO user_album_likes(user_id, album_id) VALUES($1, $2) RETURNING id`,
+        values: [userId, albumId],
+      };
+
+      const result = await this._pool.query(query);
+      if (!result.rowCount) {
+        throw new InvariantError("Failed to add like");
+      }
+      await this.incrementAlbumLike(albumId);
+    }
+
+    if (rowCount) {
+      const query = {
+        text: `DELETE FROM user_album_likes WHERE user_id = $1 AND album_id = $2`,
+        values: [userId, albumId],
+      };
+      const result = await this._pool.query(query);
+      if (!result.rowCount) {
+        throw new InvariantError("Failed to remove like");
+      }
+      await this.decrementAlbumLike(albumId);
+    }
+  }
+
+  async getAlbumLikes(albumId) {
+    const query = {
+      text: `SELECT likes FROM albums WHERE id = $1`,
+      values: [albumId],
+    };
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError("Album not found");
+    }
+    return result.rows[0].likes;
+  }
+
+  async verifyUserAlbumLike(userId, albumId) {
+    const query = {
+      text: "SELECT id FROM user_album_likes WHERE user_id = $1 AND album_id = $2",
+      values: [userId, albumId],
+    };
+    const result = await this._pool.query(query);
+    return result.rowCount;
+  }
+
+  async incrementAlbumLike(albumId) {
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: "UPDATE albums SET likes = likes + 1, updated_at = $2 WHERE id = $1",
+      values: [albumId, updatedAt],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError("Album Not Found");
+    }
+  }
+
+  async decrementAlbumLike(albumId) {
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: "UPDATE albums SET likes = likes - 1, updated_at = $2 WHERE id = $1",
+      values: [albumId, updatedAt],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError("Album Not Found");
     }
   }
 }

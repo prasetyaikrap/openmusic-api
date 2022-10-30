@@ -3,7 +3,10 @@ import pkg from "pg";
 import AuthorizationError from "../../exception/AuthorizationError.js";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
-import { getPlaylistActivitiesMap } from "../../utils/dbMapping/playlists.js";
+import {
+  getPlaylistActivitiesMap,
+  playlistActivitiesMap,
+} from "../../utils/dbMapping/playlists.js";
 
 export default class PlaylistsService {
   constructor() {
@@ -69,7 +72,7 @@ export default class PlaylistsService {
       values: [playlistId, songId],
     };
     const result = await this._pool.query(query);
-    if (!result.rowCount) {
+    if (result.rowCount) {
       throw new InvariantError("Song already exist in playlists");
     }
   }
@@ -179,12 +182,7 @@ export default class PlaylistsService {
     const resultMap = result.rows.map(getPlaylistActivitiesMap);
     const activites = {
       playlistId: resultMap[0].playlistId,
-      activities: resultMap.map(({ username, title, action, time }) => ({
-        username,
-        title,
-        action,
-        time,
-      })),
+      activities: resultMap.map(playlistActivitiesMap),
     };
     return activites;
   }

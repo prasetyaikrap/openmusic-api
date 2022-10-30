@@ -41,7 +41,7 @@ export default class CollaborationsService {
       values: [playlistId, userId],
     };
     const result = await this._pool.query(query);
-    if (!result.rowCount) {
+    if (result.rowCount) {
       throw new InvariantError("Collaborator already exists");
     }
   }

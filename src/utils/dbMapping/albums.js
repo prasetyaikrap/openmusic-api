@@ -19,3 +19,13 @@ export const albumsResMap = ({
   title,
   performer,
 });
+
+export const albumSongList = ({ songId, title, performer }) => {
+  if (songId != null) {
+    return {
+      id: songId,
+      title,
+      performer,
+    };
+  }
+};

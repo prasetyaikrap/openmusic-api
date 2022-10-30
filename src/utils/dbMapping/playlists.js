@@ -11,3 +11,10 @@ export const getPlaylistActivitiesMap = ({
   action,
   time,
 });
+
+export const playlistActivitiesMap = ({ username, title, action, time }) => ({
+  username,
+  title,
+  action,
+  time,
+});

@@ -17,6 +17,10 @@ exports.up = (pgm) => {
     cover_url: {
       type: "TEXT",
     },
+    likes: {
+      type: "INT",
+      default: 0,
+    },
     created_at: {
       type: "TIMESTAMP",
       notNull: true,
@@ -92,6 +96,25 @@ exports.up = (pgm) => {
     updated_at: {
       type: "TIMESTAMP",
       notNull: true,
+    },
+  });
+  pgm.createTable("user_album_likes", {
+    id: {
+      type: "SERIAL",
+      notNull: true,
+      primaryKey: true,
+    },
+    user_id: {
+      type: "VARCHAR(21)",
+      notNull: true,
+      references: "users",
+      onDelete: "CASCADE",
+    },
+    album_id: {
+      type: "VARCHAR(16)",
+      notNull: true,
+      references: "albums",
+      onDelete: "CASCADE",
     },
   });
   pgm.createTable("auth_tokens", {
@@ -196,6 +219,9 @@ exports.up = (pgm) => {
 
 exports.down = (pgm) => {
   pgm.dropTable("songs", {
+    cascade: true,
+  });
+  pgm.dropTable("user_album_likes", {
     cascade: true,
   });
   pgm.dropTable("albums", {

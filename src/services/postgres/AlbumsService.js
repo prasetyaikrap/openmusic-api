@@ -1,6 +1,4 @@
 import pkg from "pg";
-import path from "path";
-import fs from "fs";
 import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";

@@ -10,3 +10,19 @@ services:
       - POSTGRES_USER=DBUSER
       - POSTGRES_PASSWORD=DBPASSWORD
       - POSTGRES_DB=DBNAME
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: "rabbitmq-local"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=userdicoding
+  redis:
+    image: redis:alpine
+    container_name: "redis-local"
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes

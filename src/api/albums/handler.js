@@ -59,7 +59,7 @@ export default class AlbumsHandler {
     return response;
   }
   // Delete Album
-  async deleteAlbum(request, h) {
+  async deleteAlbumHandler(request, h) {
     const { id } = request.params;
     await this._albumsService.deleteAlbum(id);
     const response = h.response({

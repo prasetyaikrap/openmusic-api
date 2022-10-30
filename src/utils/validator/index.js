@@ -5,6 +5,7 @@ import PlaylistsSchema from "./playlists/index.js";
 import SongsSchema from "./songs/index.js";
 import UsersSchema from "./users/index.js";
 import ExportsSchema from "./exports/index.js";
+import UploadsSchema from "./uploads/index.js";
 
 export default {
   AlbumsSchema,
@@ -14,4 +15,5 @@ export default {
   SongsSchema,
   UsersSchema,
   ExportsSchema,
+  UploadsSchema,
 };

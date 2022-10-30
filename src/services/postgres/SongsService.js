@@ -61,7 +61,7 @@ export default class SongsService {
       values: [id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Record not found");
     }
     return result.rows.map(songsDetailResMap)[0];
@@ -86,7 +86,7 @@ export default class SongsService {
       values: [title, year, performer, genre, duration, albumId, id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Updated Failed. Songs ID not found");
     }
   }
@@ -98,7 +98,7 @@ export default class SongsService {
       values: [id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Deleting Failed. Songs ID not found");
     }
   }
@@ -109,7 +109,7 @@ export default class SongsService {
       values: [id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Songs ID not found");
     }
   }

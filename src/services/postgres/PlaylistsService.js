@@ -45,7 +45,7 @@ export default class PlaylistsService {
       values: [owner, playlistId],
     };
     const result = await this._pool.query(query);
-    if (result.rowCount == 0) {
+    if (!result.rowCount) {
       throw new NotFoundError("Delete Failed. Playlist does not exist");
     }
   }
@@ -69,7 +69,7 @@ export default class PlaylistsService {
       values: [playlistId, songId],
     };
     const result = await this._pool.query(query);
-    if (result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError("Song already exist in playlists");
     }
   }
@@ -84,7 +84,7 @@ export default class PlaylistsService {
       values: [playlistId, userId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError("Record not found");
     }
     const songs = await this.getSongsFromPlaylist(playlistId);
@@ -111,7 +111,7 @@ export default class PlaylistsService {
       values: [playlistId, songId],
     };
     const result = await this._pool.query(query);
-    if (result.rowCount == 0) {
+    if (!result.rowCount) {
       throw new NotFoundError("Delete Failed. Song on playlist not found");
     }
   }
@@ -122,7 +122,7 @@ export default class PlaylistsService {
       values: [playlistId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Playlist Not Found");
     }
     return result.rows[0];
@@ -145,7 +145,7 @@ export default class PlaylistsService {
       values: [playlistId, userId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new AuthorizationError("Unauthorized access");
     }
   }
@@ -173,7 +173,7 @@ export default class PlaylistsService {
       values: [playlistId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Activities record not found");
     }
     const resultMap = result.rows.map(getPlaylistActivitiesMap);

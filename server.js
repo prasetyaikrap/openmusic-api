@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import Hapi from "@hapi/hapi";
 import Jwt from "@hapi/jwt";
+import Inert from "@hapi/inert";
 
 //Internal Services
 import Plugins from "./src/api/index.js";
@@ -26,6 +27,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -55,6 +59,7 @@ const init = async () => {
     playlistsService,
     collaborationsService,
     producerService,
+    storageService,
   } = Services;
   const {
     AlbumsAPI,
@@ -63,6 +68,8 @@ const init = async () => {
     AuthenticationsAPI,
     PlaylistsAPI,
     CollaborationsAPI,
+    ExportsAPI,
+    UploadsAPI,
   } = Plugins;
   const {
     AlbumsSchema,
@@ -72,6 +79,7 @@ const init = async () => {
     SongsSchema,
     UsersSchema,
     ExportsSchema,
+    UploadsSchema,
   } = Validator;
 
   await server.register([
@@ -137,10 +145,21 @@ const init = async () => {
     {
       plugin: ExportsAPI,
       options: {
-        sevice: {
+        service: {
           producerService,
+          playlistsService,
         },
         validator: ExportsSchema,
+      },
+    },
+    {
+      plugin: UploadsAPI,
+      options: {
+        service: {
+          storageService,
+          albumsService,
+        },
+        validator: UploadsSchema,
       },
     },
   ]);

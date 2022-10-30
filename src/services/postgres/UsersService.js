@@ -34,7 +34,7 @@ export default class UserService {
       values: [username],
     };
     const result = await this._pool.query(query);
-    if (result.rows.length) {
+    if (result.rowCount) {
       throw new InvariantError(
         "Failed to add new user. Username is already exist"
       );
@@ -47,7 +47,7 @@ export default class UserService {
       values: [userid],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError("User Not Found");
     }
     return result.rows[0];
@@ -60,7 +60,7 @@ export default class UserService {
       values: [username],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new AuthenticationError("Invalid Credential");
     }
     const { id, password: hashedPassword } = result.rows[0];
@@ -77,7 +77,7 @@ export default class UserService {
       values: [userId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("User Not Found");
     }
   }

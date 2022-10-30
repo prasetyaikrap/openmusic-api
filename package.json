@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/hapi": "^20.2.2",
+    "@hapi/inert": "^7.0.0",
     "@hapi/jwt": "^3.0.0",
     "amqplib": "^0.10.3",
     "bcrypt": "^5.1.0",

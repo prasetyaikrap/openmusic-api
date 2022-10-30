@@ -1,4 +1,6 @@
 import pkg from "pg";
+import path from "path";
+import fs from "fs";
 import { nanoid } from "nanoid";
 import InvariantError from "../../exception/InvariantError.js";
 import NotFoundError from "../../exception/NotFoundError.js";
@@ -12,12 +14,11 @@ export default class AlbumsService {
   //Post New Album
   async addAlbums({ name, year }) {
     const id = nanoid(16);
-    const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
+    const insertedAt = new Date().toISOString();
 
     const query = {
-      text: "INSERT INTO albums VALUES ($1, $2, $3, $4, $5) RETURNING id",
-      values: [id, name, year, createdAt, updatedAt],
+      text: "INSERT INTO albums(id, name, year, created_at, updated_at) VALUES($1, $2, $3, $4, $4) RETURNING id",
+      values: [id, name, year, insertedAt],
     };
 
     const result = await this._pool.query(query);
@@ -36,14 +37,14 @@ export default class AlbumsService {
   //Get Album by ID
   async getAlbumById(id) {
     const query = {
-      text: `SELECT alb.id, alb.name, alb.year, alb.created_at, alb.updated_at, s.id AS song_id, s.title, s.performer 
+      text: `SELECT alb.id, alb.name, alb.year, alb.cover_url, alb.created_at, alb.updated_at, s.id AS song_id, s.title, s.performer 
       FROM albums alb
       LEFT JOIN songs s ON alb.id = s.album_id
       WHERE alb.id = $1`,
       values: [id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Record not found");
     }
     const resultMap = result.rows.map(albumsResMap);
@@ -60,6 +61,7 @@ export default class AlbumsService {
       id: resultMap[0].id,
       name: resultMap[0].name,
       year: resultMap[0].year,
+      coverUrl: resultMap[0].coverUrl,
       created_at: resultMap[0].createdAt,
       updated_at: resultMap[0].updatedAt,
       songs: songsList[0] != null ? songsList : [],
@@ -75,7 +77,7 @@ export default class AlbumsService {
       values: [name, year, updatedAt, id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Updating Failed. Albums ID not found");
     }
   }
@@ -87,8 +89,21 @@ export default class AlbumsService {
       values: [id],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError("Deleting Failed. Albums ID not found");
+    }
+  }
+
+  //Upload album cover
+  async uploadAlbumCover(albumId, coverUrl) {
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: `UPDATE albums SET cover_url = $1, updated_at = $2 WHERE id = $3`,
+      values: [coverUrl, updatedAt, albumId],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new InvariantError("Failed to update row");
     }
   }
 }

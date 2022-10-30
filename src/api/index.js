@@ -4,6 +4,8 @@ import UsersAPI from "./users/index.js";
 import PlaylistsAPI from "./playlists/index.js";
 import AuthenticationsAPI from "./authentications/index.js";
 import CollaborationsAPI from "./collaborations/index.js";
+import ExportsAPI from "./exports/index.js";
+import UploadsAPI from "./uploads/index.js";
 
 const Plugins = {
   AlbumsAPI,
@@ -12,6 +14,8 @@ const Plugins = {
   PlaylistsAPI,
   AuthenticationsAPI,
   CollaborationsAPI,
+  ExportsAPI,
+  UploadsAPI,
 };
 
 export default Plugins;

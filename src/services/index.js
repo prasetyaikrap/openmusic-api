@@ -12,7 +12,7 @@ import CacheService from "./redis/CacheService.js";
 const __dirname = process.cwd();
 
 const Services = {
-  albumsService: new AlbumsService(),
+  albumsService: new AlbumsService({ cacheService: new CacheService() }),
   songsService: new SongsService(),
   usersService: new UsersService(),
   authenticationsService: new AuthenticationsService(),
@@ -20,7 +20,6 @@ const Services = {
   collaborationsService: new CollaborationsService(),
   producerService: ProducerService,
   storageService: new StorageService(path.resolve(__dirname, "src/uploads")),
-  cacheService: new CacheService(),
 };
 
 export default Services;

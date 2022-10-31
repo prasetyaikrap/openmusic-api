@@ -5,8 +5,9 @@ import NotFoundError from "../../exception/NotFoundError.js";
 import { albumSongList, albumsResMap } from "../../utils/dbMapping/albums.js";
 
 export default class AlbumsService {
-  constructor() {
+  constructor(service) {
     this._pool = new pkg.Pool();
+    this._cacheService = service.cacheService;
   }
 
   //Post New Album
@@ -134,19 +135,35 @@ export default class AlbumsService {
       }
       await this.decrementAlbumLike(albumId);
     }
+    await this._cacheService.deleteCache(`likes:${albumId}`);
   }
 
   async getAlbumLikes(albumId) {
-    const query = {
-      text: `SELECT likes FROM albums WHERE id = $1`,
-      values: [albumId],
-    };
-    const result = await this._pool.query(query);
+    try {
+      const data = {
+        likes: JSON.parse(
+          await this._cacheService.getCache(`likes:${albumId}`)
+        ),
+        source: "cache",
+      };
+      return data;
+    } catch (err) {
+      const query = {
+        text: `SELECT likes FROM albums WHERE id = $1`,
+        values: [albumId],
+      };
+      const result = await this._pool.query(query);
 
-    if (!result.rowCount) {
-      throw new NotFoundError("Album not found");
+      if (!result.rowCount) {
+        throw new NotFoundError("Album not found");
+      }
+      const data = {
+        likes: result.rows[0].likes,
+        source: "database",
+      };
+      await this._cacheService.setCache(`likes:${albumId}`, data.likes);
+      return data;
     }
-    return result.rows[0].likes;
   }
 
   async verifyUserAlbumLike(userId, albumId) {

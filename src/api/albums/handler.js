@@ -80,9 +80,6 @@ export default class AlbumsHandler {
     await this._albumsService.verifyAlbum(albumId);
     //Update Album Like
     await this._albumsService.updateAlbumLikes(userId, albumId);
-    //Delete existing cache
-    await this._cacheService.deleteCache(`likes:${albumId}`);
-
     const response = h.response({
       status: "success",
       message: "Success to update album likes",
@@ -93,32 +90,16 @@ export default class AlbumsHandler {
   //Get Likes
   async getAlbumLikesHandler(request, h) {
     const { id: albumId } = request.params;
-    let likes;
-    let dataSource;
-    try {
-      //Get data from cache
-      likes = JSON.parse(await this._cacheService.getCache(`likes:${albumId}`));
-      dataSource = "cache";
-    } catch (err) {
-      //Get data from database
-      likes = await this._albumsService.getAlbumLikes(albumId);
-      dataSource = "database";
-      //Set cache, expiration in 1800 seconds - 30 minutes
-      await this._cacheService.setCache(
-        `likes:${albumId}`,
-        JSON.stringify(likes),
-        1800
-      );
-    }
+    const data = await this._albumsService.getAlbumLikes(albumId);
     const response = h.response({
       status: "success",
       message: "Album likes found",
       data: {
-        likes,
+        likes: data.likes,
       },
     });
     response.code(200);
-    response.header("X-Data-Source", dataSource);
+    response.header("X-Data-Source", data.source);
     return response;
   }
 }

@@ -15,7 +15,7 @@ export default class CacheService {
     this._client.connect();
   }
 
-  async setCache(key, value, expirationInSecond = 3600) {
+  async setCache(key, value, expirationInSecond = 1800) {
     await this._client.set(key, value, {
       EX: expirationInSecond,
     });
